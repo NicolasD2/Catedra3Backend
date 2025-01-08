@@ -1,0 +1,6 @@
+@PostCatedraApi_HostAddress = http://localhost:5296
+
+GET {{PostCatedraApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
