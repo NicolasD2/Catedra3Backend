@@ -9,8 +9,9 @@ namespace PostCatedraApi.src.Models
     {
         public string Titulo { get; set; } = string.Empty;
         public DateTime Fecha_de_publicacion { get; set; }
-        public string Url { get; set; } = string.Empty;
-
+        public string UrlImagen { get; set; } = string.Empty;
+        public string UsuarioId { get; set; } = string.Empty;
+        public Usuario Usuario { get; set; } 
 
     }
 }
