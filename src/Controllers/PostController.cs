@@ -4,7 +4,7 @@ using PostCatedraApi.src.Interfaces;
 using PostCatedraApi.src.Models;
 using System.Collections.Generic;
 using System.Security.Claims;
-
+using PostCatedraApi.src.Mappers;
 namespace PostCatedraApi.src.Controllers
 {
     [Authorize]
@@ -22,7 +22,9 @@ namespace PostCatedraApi.src.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Post>> GetPost()
         {
-            return Ok(_postRepository.GetPosts());
+            var posts = _postRepository.GetPosts();
+            var postDto = posts.Select(PostMapper.PostMap).ToList();
+            return Ok(postDto);
         }
 
         [HttpPost]
@@ -35,7 +37,9 @@ namespace PostCatedraApi.src.Controllers
             post.Fecha_de_publicacion = DateTime.UtcNow;
             var createdPost = _postRepository.Add(post, userId);
             _postRepository.Save();
-            return CreatedAtAction(nameof(GetPost), new { id = createdPost.Id }, createdPost);
+
+            var createdPostDto = PostMapper.PostMap(createdPost);
+            return CreatedAtAction(nameof(GetPost), new { id = createdPost.Id }, createdPostDto);
         }
     }
 }
