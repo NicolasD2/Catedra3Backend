@@ -10,10 +10,11 @@ using PostCatedraApi.src.Dtos.Post;
 using PostCatedraApi.src.Repository;
 using Microsoft.Extensions.Logging;
 using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
 
 namespace PostCatedraApi.src.Controllers
 {
-    [Authorize]
+    
     [ApiController]
     [Route("[controller]")]
     public class PostController : ControllerBase
@@ -35,7 +36,27 @@ namespace PostCatedraApi.src.Controllers
             var postDtos = posts.Select(PostMapper.PostMap).ToList(); // Utiliza PostMapper para convertir los posts
             return Ok(postDtos);
         }
+        [HttpPost("upload")]
+        public async Task<IActionResult>UploadImage([FromBody] IFormFile file){
 
+            if(file == null || file.Length== 0){
+                _logger.LogWarning("No se subio ningun archivo");
+                return BadRequest("No se subio ningun archivo");
+
+            }
+            var uploadParams = new ImageUploadParams{
+                File = new FileDescription(file.FileName, file.OpenReadStream()),
+                Folder = "post-images"
+            };
+            var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+            if(uploadResult.Error != null){
+                _logger.LogError("Fallo de subir Cloudinary: {Error}",uploadResult.Error.Message);
+                return BadRequest(uploadResult.Error.Message);
+            }
+            return Ok(new{Url =uploadResult.SecureUrl.ToString(),PublicId = uploadResult.PublicId});
+        }
+
+        [Authorize]
         [HttpPost]
         public ActionResult<PostDto> Create([FromBody] PostDto creationDto)
         {

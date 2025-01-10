@@ -11,8 +11,8 @@ using PostCatedraApi.src.Data;
 namespace PostCatedraApi.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250110121218_AddIdentity")]
-    partial class AddIdentity
+    [Migration("20250110214924_FirstMigration")]
+    partial class FirstMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

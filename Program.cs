@@ -14,7 +14,7 @@ using CloudinaryDotNet;
 using PostCatedraApi.src.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
-var CloudinarySettings = builder.Configuration.GetSection("CloudinarySettings").Get<CloudinarySettings>();
+var CloudinarySettings = builder.Configuration.GetSection("Cloudinary").Get<CloudinarySettings>();
     var CloudinaryAccount = new Account(
         CloudinarySettings!.CloudName,
         CloudinarySettings.ApiKey,
@@ -22,6 +22,7 @@ var CloudinarySettings = builder.Configuration.GetSection("CloudinarySettings").
     );
     var cloudinary = new Cloudinary(CloudinaryAccount);
 // Add services to the container.
+builder.Services.AddSingleton(cloudinary);
 builder.Services.AddControllers();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
@@ -45,18 +46,17 @@ builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidIssuer = builder.Configuration["JWT:Issuer"],
         ValidateAudience = true,
-        ValidAudience = builder.Configuration["Jwt:Audience"],
+        ValidAudience = builder.Configuration["JWT:Audience"],
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SigningKey"] ?? throw new InvalidOperationException("JWT Signing Key must be set in appsettings."))),
-        ClockSkew = TimeSpan.Zero  // Reduce or remove clock skew if time synchronization is critical
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SigningKey"])),
+        ClockSkew = TimeSpan.Zero
     };
 });
 
