@@ -8,6 +8,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using PostCatedraApi.src.Dtos.Usuario;
 using PostCatedraApi.src.Models;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace PostCatedraApi.src
 {
@@ -39,11 +43,30 @@ namespace PostCatedraApi.src
         public async Task<IActionResult> Login([FromBody]LoginDto model){
             var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false);
             if(result.Succeeded){
-                var user = await _userManager.FindByEmailAsync(model.Email, model.Password);
+                var user = await _userManager.FindByEmailAsync(model.Email);
                 var token = GenerateJwtToken(user);
                 return Ok(new{Token = token});
             }
             return Unauthorized("Credenciales invalidas");
+        }
+        private string GenerateJwtToken(Usuario user)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_configuration["JwtKey"]);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new Claim[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, user.Id),
+                    new Claim(ClaimTypes.Email, user.Email),
+                    // Agrega más claims si es necesario
+                }),
+                Expires = DateTime.UtcNow.AddDays(7), // Configura la expiración según necesidades
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
         }
     }
 }
