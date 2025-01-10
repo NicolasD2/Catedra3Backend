@@ -8,8 +8,6 @@ namespace PostCatedraApi.src.Models
 {
     public class Usuario : IdentityUser
     {
-        public string Email { get; set; } = string.Empty;
 
-        public string Contraseña { get; set; } = string.Empty;
     }
 }
