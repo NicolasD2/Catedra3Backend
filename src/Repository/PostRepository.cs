@@ -19,7 +19,8 @@ namespace PostCatedraApi.src.Repository
         public IEnumerable<Post> GetPosts(){
             return _context.Posts.ToList();
         }
-        public Post Add(Post post){
+        public Post Add(Post post, string userId){
+            post.UsuarioId = userId;
             _context.Posts.Add(post);
             return post;
         }

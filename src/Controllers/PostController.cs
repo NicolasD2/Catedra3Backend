@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PostCatedraApi.src.Interfaces;
 using PostCatedraApi.src.Models;
 using System.Collections.Generic;
+using System.Security.Claims;
 
 namespace PostCatedraApi.src.Controllers
 {
@@ -27,7 +28,12 @@ namespace PostCatedraApi.src.Controllers
         [HttpPost]
         public ActionResult<Post> Create([FromBody] Post post)
         {
-            var createdPost = _postRepository.Add(post);
+            if(post.Titulo.Length<5){
+                return BadRequest("El titulo debe tener al menos 5 caracteres");
+            }
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            post.Fecha_de_publicacion = DateTime.UtcNow;
+            var createdPost = _postRepository.Add(post, userId);
             _postRepository.Save();
             return CreatedAtAction(nameof(GetPost), new { id = createdPost.Id }, createdPost);
         }

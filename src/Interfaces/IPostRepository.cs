@@ -9,7 +9,7 @@ namespace PostCatedraApi.src.Interfaces
     public interface IPostRepository
     {
         IEnumerable<Post>GetPosts();
-        Post Add(Post post);
+        Post Add(Post post, string UsuarioId);
         void Save();
     }
 }
