@@ -54,18 +54,32 @@ namespace PostCatedraApi.src
         }
         private string GenerateJwtToken(Usuario user)
         {
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user), "User cannot be null when generating JWT token.");
+            }
+
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_configuration["JwtKey"] ?? throw new InvalidOperationException("JWT Key must be configured in appsettings."));
-            var emailClaim = new Claim(ClaimTypes.Email, user.Email ?? string.Empty);
+            var keyString = _configuration["JWT:SigningKey"]; // Asegúrate de que la clave en appsettings.json esté bajo "JWT:SigningKey"
+            
+            if (string.IsNullOrWhiteSpace(keyString))
+            {
+                throw new InvalidOperationException("JWT Signing Key must be configured in appsettings.");
+            }
+
+            var key = Encoding.UTF8.GetBytes(keyString);
+            var claims = new List<Claim>
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // JTI for token id
+                new Claim(ClaimTypes.NameIdentifier, user.Id)
+            };
+
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new Claim[]
-                {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id),
-                    new Claim(ClaimTypes.Email, user.Email),
-                    // Agrega más claims si es necesario
-                }),
-                Expires = DateTime.UtcNow.AddDays(7), // Configura la expiración según necesidades
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddDays(7), // Configura la duración del token según tus necesidades
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
