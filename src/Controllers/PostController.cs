@@ -1,35 +1,35 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PostCatedraApi.src.Data;
+using PostCatedraApi.src.Interfaces;
 using PostCatedraApi.src.Models;
+using System.Collections.Generic;
 
 namespace PostCatedraApi.src.Controllers
 {
-
     [Authorize]
     [ApiController]
     [Route("[controller]")]
-    public class PostController: ControllerBase
+    public class PostController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IPostRepository _postRepository;
 
-        public PostController(ApplicationDbContext context){
-            _context = context;
+        public PostController(IPostRepository postRepository)
+        {
+            _postRepository = postRepository;
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Post>> GetAll(){
-            return _context.Posts.ToList();
+        public ActionResult<IEnumerable<Post>> GetPost()
+        {
+            return Ok(_postRepository.GetPosts());
         }
+
         [HttpPost]
-        public ActionResult<Post> Create([FromBody] Post post){
-            _context.Posts.Add(post);
-            _context.SaveChanges();
-            return CreatedAtAction(nameof(GetAll), new{id = post.Id}, post);
+        public ActionResult<Post> Create([FromBody] Post post)
+        {
+            var createdPost = _postRepository.Add(post);
+            _postRepository.Save();
+            return CreatedAtAction(nameof(GetPost), new { id = createdPost.Id }, createdPost);
         }
     }
 }
