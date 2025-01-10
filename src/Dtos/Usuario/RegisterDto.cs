@@ -10,9 +10,9 @@ namespace PostCatedraApi.src.Dtos.Usuario
     {
         [Required]
         [EmailAddress]
-        public string Email {get; set;}
+        public string Email {get; set;} = string.Empty;
         [Required]
         [StringLength(100, ErrorMessage ="La contraseña debe tener minimo 6 caracteres", MinimumLength = 6)]
-        public string Password{get; set;}
+        public string Password{get; set;} = string.Empty;
     }
 }

@@ -13,7 +13,7 @@ namespace PostCatedraApi.src.Models
         public string Contenido{get; set;} = string.Empty;
         public string UrlImagen { get; set; } = string.Empty;
         public string UsuarioId { get; set; } = string.Empty;
-        public Usuario Usuario { get; set; }  
+        public Usuario Usuario { get; set; }  = null!;
 
     }
 }
