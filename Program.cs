@@ -9,13 +9,14 @@ using PostCatedraApi.src.Data;
 using PostCatedraApi.src.Models;
 
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
+           .LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information));
 // Configure Identity with specific password settings
 builder.Services.AddIdentity<Usuario, IdentityRole>(options =>
 {
