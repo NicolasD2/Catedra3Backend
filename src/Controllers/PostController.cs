@@ -9,6 +9,7 @@ using PostCatedraApi.src.Mappers;
 using PostCatedraApi.src.Dtos.Post;
 using PostCatedraApi.src.Repository;
 using Microsoft.Extensions.Logging;
+using CloudinaryDotNet;
 
 namespace PostCatedraApi.src.Controllers
 {
@@ -19,10 +20,12 @@ namespace PostCatedraApi.src.Controllers
     {
         private readonly IPostRepository _postRepository;
         private readonly ILogger<PostController> _logger;
-        public PostController(IPostRepository postRepository, ILogger<PostController> logger)
+        private readonly Cloudinary _cloudinary;
+        public PostController(IPostRepository postRepository, ILogger<PostController> logger, Cloudinary cloudinary)
         {
             _postRepository = postRepository;
             _logger = logger;
+            _cloudinary = cloudinary;
         }
 
         [HttpGet]

@@ -10,9 +10,17 @@ using PostCatedraApi.src.Models;
 using PostCatedraApi.src.Interfaces;
 using PostCatedraApi.src.Repository;
 using Microsoft.Extensions.Logging;
+using CloudinaryDotNet;
+using PostCatedraApi.src.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
-
+var CloudinarySettings = builder.Configuration.GetSection("CloudinarySettings").Get<CloudinarySettings>();
+    var CloudinaryAccount = new Account(
+        CloudinarySettings!.CloudName,
+        CloudinarySettings.ApiKey,
+        CloudinarySettings.ApiSecret
+    );
+    var cloudinary = new Cloudinary(CloudinaryAccount);
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
