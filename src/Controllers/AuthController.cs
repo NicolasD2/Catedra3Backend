@@ -15,7 +15,7 @@ using System.Text;
 
 namespace PostCatedraApi.src
 {
-    [Route("api/[Controllers]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class AuthController:ControllerBase
     {
@@ -44,6 +44,9 @@ namespace PostCatedraApi.src
             var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false);
             if(result.Succeeded){
                 var user = await _userManager.FindByEmailAsync(model.Email);
+                if(user == null){
+                    throw new ArgumentNullException(nameof(user));
+                }
                 var token = GenerateJwtToken(user);
                 return Ok(new{Token = token});
             }
@@ -52,7 +55,8 @@ namespace PostCatedraApi.src
         private string GenerateJwtToken(Usuario user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_configuration["JwtKey"]);
+            var key = Encoding.UTF8.GetBytes(_configuration["JwtKey"] ?? throw new InvalidOperationException("JWT Key must be configured in appsettings."));
+            var emailClaim = new Claim(ClaimTypes.Email, user.Email ?? string.Empty);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new Claim[]
