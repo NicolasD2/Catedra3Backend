@@ -1,57 +1,60 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Components;
-using RouteAttribute = Microsoft.AspNetCore.Mvc.RouteAttribute;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using PostCatedraApi.src.Dtos.Usuario;
-using PostCatedraApi.src.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-
-namespace PostCatedraApi.src
+using PostCatedraApi.src.Dtos.Usuario;
+using PostCatedraApi.src.Models;
+using PostCatedraApi.src.Interfaces;
+namespace PostCatedraApi.src.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController:ControllerBase
+    public class AuthController : ControllerBase
     {
-        private readonly UserManager<Usuario>_userManager;
-        private readonly SignInManager<Usuario> _signInManager;
+        private readonly IUserRepository _userRepository;
         private readonly IConfiguration _configuration;
 
-        public AuthController(UserManager<Usuario> userManager, SignInManager<Usuario>signInManager, IConfiguration configuration){
-            _userManager = userManager;
-            _signInManager = signInManager;
+        public AuthController(IUserRepository userRepository, IConfiguration configuration)
+        {
+            _userRepository = userRepository;
             _configuration = configuration;
         }
-        [HttpPost("register")]
-        public async Task<ActionResult> Register(RegisterDto model){
-            var user = new Usuario{UserName = model.Email, Email = model.Email};
-            var result = await _userManager.CreateAsync(user, model.Password);
 
-            if(result.Succeeded){
+        [HttpPost("register")]
+        public async Task<ActionResult> Register(RegisterDto model)
+        {
+            var user = new Usuario { UserName = model.Email, Email = model.Email };
+            var result = await _userRepository.CreateAsync(user, model.Password);
+
+            if (result.Succeeded)
+            {
                 return Ok();
             }
             return BadRequest(result.Errors);
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody]LoginDto model){
-            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false);
-            if(result.Succeeded){
-                var user = await _userManager.FindByEmailAsync(model.Email);
-                if(user == null){
-                    throw new ArgumentNullException(nameof(user));
+        public async Task<IActionResult> Login([FromBody] LoginDto model)
+        {
+            var result = await _userRepository.PasswordSignInAsync(model.Email, model.Password, false, false);
+            if (result.Succeeded)
+            {
+                var user = await _userRepository.FindByEmailAsync(model.Email);
+                if (user == null)
+                {
+                    return Unauthorized("No such user.");
                 }
                 var token = GenerateJwtToken(user);
-                return Ok(new{Token = token});
+                return Ok(new { Token = token });
             }
-            return Unauthorized("Credenciales invalidas");
+            return Unauthorized("Invalid credentials.");
         }
+
         private string GenerateJwtToken(Usuario user)
         {
             if (user == null)
@@ -60,8 +63,7 @@ namespace PostCatedraApi.src
             }
 
             var tokenHandler = new JwtSecurityTokenHandler();
-            var keyString = _configuration["JWT:SigningKey"]; // Asegúrate de que la clave en appsettings.json esté bajo "JWT:SigningKey"
-            
+            var keyString = _configuration["JWT:SigningKey"];
             if (string.IsNullOrWhiteSpace(keyString))
             {
                 throw new InvalidOperationException("JWT Signing Key must be configured in appsettings.");
@@ -72,14 +74,14 @@ namespace PostCatedraApi.src
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // JTI for token id
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(ClaimTypes.NameIdentifier, user.Id)
             };
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddDays(7), // Configura la duración del token según tus necesidades
+                Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 

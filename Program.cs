@@ -7,12 +7,14 @@ using System;
 using Microsoft.OpenApi.Models;
 using PostCatedraApi.src.Data;
 using PostCatedraApi.src.Models;
-
+using PostCatedraApi.src.Interfaces;
+using PostCatedraApi.src.Repository;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
@@ -24,7 +26,7 @@ builder.Services.AddIdentity<Usuario, IdentityRole>(options =>
     options.Password.RequireLowercase = false;
     options.Password.RequireUppercase = false;
     options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequiredLength = 12;
+    options.Password.RequiredLength = 6;
 }).AddEntityFrameworkStores<ApplicationDbContext>();
 
 // Configure authentication using JWT with specific schemes
