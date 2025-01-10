@@ -36,7 +36,21 @@ namespace PostCatedraApi.src.Controllers
             {
                 return Ok();
             }
-            return BadRequest(result.Errors);
+                
+            var errorMessage = "No se pudo registrar al usuario. ";
+
+            
+            if (result.Errors.Any(e => e.Code == "DuplicateUserName"))
+            {
+                errorMessage += "El email ya está en uso.";
+            }
+            else
+            {
+                errorMessage += "Por favor, verifica los datos ingresados.";
+            }
+
+            // Devolver BadRequest con el mensaje personalizado.
+            return BadRequest(new { Message = errorMessage, Errors = result.Errors });
         }
 
         [HttpPost("login")]
