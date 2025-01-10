@@ -138,3 +138,5 @@ C:\Users\ni-ko\Desktop\Catedra 3 IDWM\PostCatedraApi\obj\Debug\net8.0\refint\Pos
 C:\Users\ni-ko\Desktop\Catedra 3 IDWM\PostCatedraApi\obj\Debug\net8.0\PostCatedraApi.pdb
 C:\Users\ni-ko\Desktop\Catedra 3 IDWM\PostCatedraApi\obj\Debug\net8.0\PostCatedraApi.genruntimeconfig.cache
 C:\Users\ni-ko\Desktop\Catedra 3 IDWM\PostCatedraApi\obj\Debug\net8.0\ref\PostCatedraApi.dll
+C:\Users\ni-ko\Desktop\Catedra 3 IDWM\PostCatedraApi\bin\Debug\net8.0\CloudinaryDotNet.dll
+C:\Users\ni-ko\Desktop\Catedra 3 IDWM\PostCatedraApi\bin\Debug\net8.0\Newtonsoft.Json.dll
