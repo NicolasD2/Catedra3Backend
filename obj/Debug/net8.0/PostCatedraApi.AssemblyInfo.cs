@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PostCatedraApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+098ee04687fb41d6c21555e69d10d51d3a44d8b8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d0f29f74a0aaed74902d08f0ec8efa4cddc8e132")]
 [assembly: System.Reflection.AssemblyProductAttribute("PostCatedraApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PostCatedraApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
