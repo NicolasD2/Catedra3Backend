@@ -8,6 +8,7 @@ using System.Security.Claims;
 using PostCatedraApi.src.Mappers;
 using PostCatedraApi.src.Dtos.Post;
 using PostCatedraApi.src.Repository;
+using Microsoft.Extensions.Logging;
 
 namespace PostCatedraApi.src.Controllers
 {
@@ -17,10 +18,11 @@ namespace PostCatedraApi.src.Controllers
     public class PostController : ControllerBase
     {
         private readonly IPostRepository _postRepository;
-
-        public PostController(IPostRepository postRepository)
+        private readonly ILogger<PostController> _logger;
+        public PostController(IPostRepository postRepository, ILogger<PostController> logger)
         {
             _postRepository = postRepository;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -34,13 +36,16 @@ namespace PostCatedraApi.src.Controllers
         [HttpPost]
         public ActionResult<PostDto> Create([FromBody] PostDto creationDto)
         {
+             _logger.LogInformation("Attempting to create post with title: {Title}", creationDto.Titulo);
             if (creationDto.Titulo.Length < 5)
             {
+                 _logger.LogWarning("Post creation failed: Title too short.");
                 return BadRequest("El título debe tener al menos 5 caracteres.");
             }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if(userId == null){
+                _logger.LogWarning("Post creation failed: No user ID found in token.");
                 return Unauthorized("No se pudo obtener la identidad del usuario");
             }
             var post = new Post
