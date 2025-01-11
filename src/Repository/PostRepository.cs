@@ -22,6 +22,7 @@ namespace PostCatedraApi.src.Repository
         public Post Add(Post post, string userId){
             post.UsuarioId = userId;
             _context.Posts.Add(post);
+            _context.SaveChanges();
             return post;
         }
         public void Save(){

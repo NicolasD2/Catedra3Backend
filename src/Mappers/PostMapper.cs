@@ -15,7 +15,7 @@ namespace PostCatedraApi.src.Mappers
                 Titulo= post.Titulo,
                 FechaDePublicacion = post.Fecha_de_publicacion,
                 UrlImagen = post.UrlImagen,
-                CreadorUserName = post.Usuario.UserName
+                CreadorUserName = post.Usuario?.UserName ??"Desconocido"
             };
         }
     }

@@ -36,24 +36,60 @@ namespace PostCatedraApi.src.Controllers
             var postDtos = posts.Select(PostMapper.PostMap).ToList(); // Utiliza PostMapper para convertir los posts
             return Ok(postDtos);
         }
+        
         [HttpPost("upload")]
-        public async Task<IActionResult>UploadImage([FromBody] IFormFile file){
-
-            if(file == null || file.Length== 0){
-                _logger.LogWarning("No se subio ningun archivo");
-                return BadRequest("No se subio ningun archivo");
-
+        public async Task<IActionResult> UploadImage(IFormFile file)
+        {
+            // Validar si el archivo es nulo o su tamaño es cero
+            if (file == null || file.Length == 0)
+            {
+                _logger.LogWarning("No se subió ningún archivo");
+                return BadRequest("No se subió ningún archivo.");
             }
-            var uploadParams = new ImageUploadParams{
-                File = new FileDescription(file.FileName, file.OpenReadStream()),
-                Folder = "post-images"
-            };
-            var uploadResult = await _cloudinary.UploadAsync(uploadParams);
-            if(uploadResult.Error != null){
-                _logger.LogError("Fallo de subir Cloudinary: {Error}",uploadResult.Error.Message);
-                return BadRequest(uploadResult.Error.Message);
+
+            // Validar tamaño máximo del archivo (5MB)
+            const long maxFileSize = 5 * 1024 * 1024; // 5 MB
+            if (file.Length > maxFileSize)
+            {
+                _logger.LogWarning("El archivo es demasiado grande: {Size} bytes", file.Length);
+                return BadRequest("El archivo es demasiado grande. Tamaño máximo permitido: 5 MB.");
             }
-            return Ok(new{Url =uploadResult.SecureUrl.ToString(),PublicId = uploadResult.PublicId});
+
+            // Validar formatos permitidos (JPG, PNG)
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
+            var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
+
+            if (!allowedExtensions.Contains(fileExtension))
+            {
+                _logger.LogWarning("Formato de archivo no permitido: {Extension}", fileExtension);
+                return BadRequest("Formato de archivo no permitido. Solo se permiten imágenes JPG y PNG.");
+            }
+
+            try
+            {
+                // Configurar parámetros de subida a Cloudinary
+                var uploadParams = new ImageUploadParams
+                {
+                    File = new FileDescription(file.FileName, file.OpenReadStream()),
+                    Folder = "post-images"
+                };
+
+                var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+
+                if (uploadResult.Error != null)
+                {
+                    _logger.LogError("Error al subir a Cloudinary: {Error}", uploadResult.Error.Message);
+                    return BadRequest(uploadResult.Error.Message);
+                }
+
+                // Retornar URL y PublicId de la imagen subida
+                return Ok(new { Url = uploadResult.SecureUrl.ToString(), PublicId = uploadResult.PublicId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error inesperado al subir la imagen: {Message}", ex.Message);
+                return StatusCode(500, "Ocurrió un error al procesar la imagen.");
+            }
         }
 
         [Authorize]
